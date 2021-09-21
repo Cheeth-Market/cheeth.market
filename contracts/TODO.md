@@ -9,9 +9,9 @@
 
 - Listing an item
 - Buying an item
-- Cancel Listing
+- Canceling a Listing
 - Bidding an item
 - Accepting bid
 - Canceling bid
-- Claim eth
+- Claiming eth
 - List of unsold item and user item (might remove those if the frontend already does it)
