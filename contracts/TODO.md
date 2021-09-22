@@ -1,6 +1,5 @@
 # To Do
 
-- Struct or mapping of the allowed nft contract addresses managed by owner
 - Keep track of bids accepts/cancels
 - Bids events (if the frontend needs it)
 - Tests
@@ -9,9 +8,10 @@
 
 - Listing an item
 - Buying an item
-- Canceling a Listing
+- Cancel Listing
 - Bidding an item
 - Accepting bid
 - Canceling bid
-- Claiming eth
+- Claim eth
+- Mapping of the allowed nft contract addresses managed by owner
 - List of unsold item and user item (might remove those if the frontend already does it)

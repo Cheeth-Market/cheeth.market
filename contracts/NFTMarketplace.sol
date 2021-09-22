@@ -20,6 +20,7 @@ contract NFTMarketplace is ReentrancyGuard {
 
     struct Bid {
         uint256 BidId;
+        string assetType;
         address nftContract;
         uint256 tokenId;
         uint256 price;
@@ -30,6 +31,7 @@ contract NFTMarketplace is ReentrancyGuard {
 
     struct MarketItem {
         uint256 itemId;
+        string assetType;
         address nftContract;
         uint256 tokenId;
         address payable seller;
@@ -40,12 +42,14 @@ contract NFTMarketplace is ReentrancyGuard {
 
     mapping(uint256 => MarketItem) private idToMarketItem;
     mapping(uint256 => Bid) private bidIdtoBid;
+    mapping(string => address) private allowedAsset;
     mapping(address => uint256) public claimableEth;
 
     event MarketBid(
         address indexed nftContract,
         uint256 indexed tokenId,
         uint256 BidId,
+        string assetType,
         uint256 price,
         address bider,
         uint256 expirationBlock
@@ -55,6 +59,7 @@ contract NFTMarketplace is ReentrancyGuard {
         uint256 indexed itemId,
         address indexed nftContract,
         uint256 indexed tokenId,
+        string assetType,
         address seller,
         address owner,
         uint256 price
@@ -64,6 +69,11 @@ contract NFTMarketplace is ReentrancyGuard {
 
     constructor() {
         owner = payable(msg.sender);
+    }
+
+    function pushAsset(string assetType, address nftContract) public {
+        require(msg.sender == owner, "Not owner");
+        allowedAsset[assetType] = nftContract;
     }
 
     function getMarketItem(uint256 marketItemId)
@@ -78,15 +88,18 @@ contract NFTMarketplace is ReentrancyGuard {
     function createMarketItem(
         address nftContract,
         uint256 tokenId,
-        uint256 price
+        uint256 price,
+        string memory assetType
     ) public payable nonReentrant {
         require(price > 0, "Price must be at least 1 wei");
+        require(allowedAsset[assetType] == nftContract, "Asset not valid");
 
         _itemIds.increment();
         uint256 itemId = _itemIds.current();
 
         idToMarketItem[itemId] = MarketItem(
             itemId,
+            assetType,
             nftContract,
             tokenId,
             payable(msg.sender),
@@ -101,6 +114,7 @@ contract NFTMarketplace is ReentrancyGuard {
             itemId,
             nftContract,
             tokenId,
+            assetType,
             msg.sender,
             address(0),
             price
@@ -113,23 +127,22 @@ contract NFTMarketplace is ReentrancyGuard {
             idToMarketItem[itemId].seller == msg.sender,
             "You don't own this token"
         );
+
         IERC721(idToMarketItem[itemId].nftContract).transferFrom(
             address(this),
             msg.sender,
             idToMarketItem[itemId].tokenId
         );
+
         idToMarketItem[itemId].available = false;
         _itemCanceled.increment();
     }
 
     //Buy an item
-    function createMarketSale(address nftContract, uint256 itemId)
-        public
-        payable
-        nonReentrant
-    {
+    function createMarketSale(uint256 itemId) public payable nonReentrant {
         uint256 price = idToMarketItem[itemId].price;
         uint256 tokenId = idToMarketItem[itemId].tokenId;
+
         require(
             msg.value == price,
             "Please submit the asking price in order to complete the purchase"
@@ -137,7 +150,13 @@ contract NFTMarketplace is ReentrancyGuard {
 
         payable(address(this)).transfer(msg.value);
         claimableEth[idToMarketItem[itemId].seller] += msg.value;
-        IERC721(nftContract).transferFrom(address(this), msg.sender, tokenId);
+
+        IERC721(idToMarketItem[itemId].nftContract).transferFrom(
+            address(this),
+            msg.sender,
+            tokenId
+        );
+
         idToMarketItem[itemId].owner = payable(msg.sender);
         idToMarketItem[itemId].available = false;
         _itemsSold.increment();
@@ -147,14 +166,18 @@ contract NFTMarketplace is ReentrancyGuard {
     function bid(
         address nftContract,
         uint256 tokenId,
+        string memory assetType,
         uint256 price,
         uint256 expirationBlock,
         address payable bider,
         bool available
     ) public payable nonReentrant {
         require(price == msg.value, "Not enaugh funds");
+        require(allowedAsset[assetType] == nftContract, "Asset not valid");
+
         bidIdtoBid[BidId] = Bid(
             BidId,
+            assetType,
             nftContract,
             tokenId,
             price,
@@ -167,10 +190,12 @@ contract NFTMarketplace is ReentrancyGuard {
             nftContract,
             tokenId,
             BidId,
+            assetType,
             price,
             bider,
             expirationBlock
         );
+
         BidId.increment();
     }
 
@@ -184,12 +209,17 @@ contract NFTMarketplace is ReentrancyGuard {
             "You don't own this token"
         );
         require(bidIdtoBid[BidId].available == true, "Expired bid");
+        require(
+            block.number < bidIdtoBid[BidId].expirationBlock,
+            "Expired bid"
+        );
 
         IERC721(bidIdtoBid[BidId].nftContract).transferFrom(
             msg.sender,
             bidIdtoBid[BidId].bider,
             bidIdtoBid[BidId].tokenId
         );
+
         claimableEth[msg.sender] += bidIdtoBid[BidId].price;
         bidIdtoBid[BidId].available = false;
     }
