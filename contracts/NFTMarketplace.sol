@@ -48,7 +48,7 @@ contract NFTMarketplace is ReentrancyGuard {
     event MarketBid(
         address indexed nftContract,
         uint256 indexed tokenId,
-        uint256 BidId,
+        uint256 indexed BidId,
         string assetType,
         uint256 price,
         address bider,
@@ -90,7 +90,7 @@ contract NFTMarketplace is ReentrancyGuard {
         uint256 tokenId,
         uint256 price,
         string memory assetType
-    ) public payable nonReentrant {
+    ) public nonReentrant {
         require(price > 0, "Price must be at least 1 wei");
         require(allowedAsset[assetType] == nftContract, "Asset not valid");
 
@@ -122,7 +122,7 @@ contract NFTMarketplace is ReentrancyGuard {
     }
 
     //Cancel a listing
-    function cancelMarketItem(uint256 itemId) public payable nonReentrant {
+    function cancelMarketItem(uint256 itemId) public nonReentrant {
         require(
             idToMarketItem[itemId].seller == msg.sender,
             "You don't own this token"
@@ -200,7 +200,7 @@ contract NFTMarketplace is ReentrancyGuard {
     }
 
     //Accept bid
-    function acceptBid(uint256 BidId) public payable nonReentrant {
+    function acceptBid(uint256 BidId) public nonReentrant {
         require(
             msg.sender ==
                 bidIdtoBid[BidId].nftContract.ownerOf(
