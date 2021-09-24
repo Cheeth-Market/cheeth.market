@@ -3,6 +3,8 @@
 - Keep track of bids accepts/cancels
 - Bids events (if the frontend needs it)
 - Tests
+- Add pagination to fetchMarketItems
+- Trade history
 
 # Existing features
 
