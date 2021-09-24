@@ -10,6 +10,10 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
  Forked from https://gist.github.com/dabit3/52e818faa83449bb5303cb868aee78f5
  */
 
+contract NFT {
+    function ownerOf(uint256 tokenId) public returns (address) {}
+}
+
 contract NFTMarketplace is ReentrancyGuard {
     using Counters for Counters.Counter;
 
@@ -199,30 +203,31 @@ contract NFTMarketplace is ReentrancyGuard {
         _BidId.increment();
     }
 
-    //Accept bid
-    // function acceptBid(uint256 BidId) public payable nonReentrant {
-    //     require(
-    //         msg.sender ==
-    //             bidIdtoBid[BidId].nftContract.ownerOf(
-    //                 bidIdtoBid[BidId].tokenId
-    //             ),
-    //         "You don't own this token"
-    //     );
-    //     require(bidIdtoBid[BidId].available == true, "Expired bid");
-    //     require(
-    //         block.number < bidIdtoBid[BidId].expirationBlock,
-    //         "Expired bid"
-    //     );
+    // Accept bid
+    function acceptBid(uint256 BidId) public payable nonReentrant {
+        NFT nft = NFT(bidIdtoBid[BidId].nftContract);
+        require(
+            msg.sender ==
+                nft.ownerOf(
+                    bidIdtoBid[BidId].tokenId
+                ),
+            "You don't own this token"
+        );
+        require(bidIdtoBid[BidId].available == true, "Expired bid");
+        require(
+            block.number < bidIdtoBid[BidId].expirationBlock,
+            "Expired bid"
+        );
 
-    //     IERC721(bidIdtoBid[BidId].nftContract).transferFrom(
-    //         msg.sender,
-    //         bidIdtoBid[BidId].bider,
-    //         bidIdtoBid[BidId].tokenId
-    //     );
+        IERC721(bidIdtoBid[BidId].nftContract).transferFrom(
+            msg.sender,
+            bidIdtoBid[BidId].bider,
+            bidIdtoBid[BidId].tokenId
+        );
 
-    //     claimableEth[msg.sender] += bidIdtoBid[BidId].price;
-    //     bidIdtoBid[BidId].available = false;
-    // }
+        claimableEth[msg.sender] += bidIdtoBid[BidId].price;
+        bidIdtoBid[BidId].available = false;
+    }
 
     //Cancel bid
     function cancelBid(uint256 BidId) public nonReentrant {

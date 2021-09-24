@@ -5,6 +5,7 @@
 - Tests
 - Add pagination to fetchMarketItems
 - Trade history
+- Add openzeppelin Access Control
 
 # Existing features
 
