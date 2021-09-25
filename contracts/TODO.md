@@ -5,7 +5,6 @@
 - Tests
 - Add pagination to fetchMarketItems
 - Trade history
-- Add openzeppelin Access Control
 
 # Existing features
 
@@ -18,3 +17,4 @@
 - Claim eth
 - Mapping of the allowed nft contract addresses managed by owner
 - List of unsold item and user item (might remove those if the frontend already does it)
+- Add openzeppelin Access Control

@@ -5,6 +5,7 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/ownership/Ownable.sol";
 
 /**
  Forked from https://gist.github.com/dabit3/52e818faa83449bb5303cb868aee78f5
@@ -14,7 +15,7 @@ contract NFT {
     function ownerOf(uint256 tokenId) public returns (address) {}
 }
 
-contract NFTMarketplace is ReentrancyGuard {
+contract NFTMarketplace is ReentrancyGuard, Ownable {
     using Counters for Counters.Counter;
 
     Counters.Counter private _itemIds;
@@ -75,8 +76,7 @@ contract NFTMarketplace is ReentrancyGuard {
         owner = payable(msg.sender);
     }
 
-    function pushAsset(string memory assetType, address nftContract) public {
-        require(msg.sender == owner, "Not owner");
+    function pushAsset(string memory assetType, address nftContract) public onlyOwner{
         allowedAsset[assetType] = nftContract;
     }
 
