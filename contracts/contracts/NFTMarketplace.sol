@@ -70,12 +70,6 @@ contract NFTMarketplace is ReentrancyGuard, Ownable {
         uint256 price
     );
 
-    address payable public owner;
-
-    constructor() {
-        owner = payable(msg.sender);
-    }
-
     function pushAsset(string memory assetType, address nftContract) public onlyOwner{
         allowedAsset[assetType] = nftContract;
     }
