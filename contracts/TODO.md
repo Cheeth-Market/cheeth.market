@@ -1,20 +1,21 @@
 # To Do
 
-- Bids events (if the frontend needs it)
 - Tests
 - Add pagination to fetchMarketItems
-- Trade history
 
 # Existing features
 
 - Listing an item
 - Buying an item
-- Cancel Listing
+- Canceling a Listing
 - Bidding an item
-- Accepting bid
-- Canceling bid
-- Claim eth
+- Accepting a bid
+- Canceling a bid
+- Claiming eth
 - Mapping of the allowed nft contract addresses managed by owner
 - List of unsold item and user item (might remove those if the frontend already does it)
-- Add openzeppelin Ownable
-- Keep track of bids accepts/cancels
+- Openzeppelin's Ownable added
+- Keeping track of bid's accepts/cancels
+- Keeping track of claims
+- Bids events (if the frontend needs it)
+- Trade history

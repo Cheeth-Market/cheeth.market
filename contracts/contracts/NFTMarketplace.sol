@@ -22,12 +22,23 @@ contract NFTMarketplace is ReentrancyGuard, Ownable {
     Counters.Counter private _itemsSold;
     Counters.Counter private _itemCanceled;
     Counters.Counter private _BidId;
+    Counters.Counter private _tradeId;
+    Counters.Counter private _claimId;
 
     enum Status {
         Available,
         Sold,
         Canceled,
         Accepted
+    }
+
+    enum Tradetype {
+        Listing,
+        Buy,
+        Cancel,
+        Bid,
+        Accept,
+        Claim
     }
 
     struct Bid {
@@ -52,8 +63,24 @@ contract NFTMarketplace is ReentrancyGuard, Ownable {
         Status status;
     }
 
+    struct Claim {
+        uint256 claimId;
+        uint256 amount;
+        address from;
+    }
+
+    struct Trade {
+        uint256 tradeId;
+        Tradetype trade;
+        uint256 typeId;
+        address from;
+        uint256 blockNum;
+    }
+
     mapping(uint256 => MarketItem) private idToMarketItem;
     mapping(uint256 => Bid) private bidIdtoBid;
+    mapping(uint256 => Trade) private tradeIdtoTrade;
+    mapping(uint256 => Claim) private claimIdtoClaim;
     mapping(string => address) private allowedAsset;
     mapping(address => uint256) private claimableEth;
 
@@ -100,7 +127,10 @@ contract NFTMarketplace is ReentrancyGuard, Ownable {
         require(allowedAsset[assetType] == nftContract, "Asset not valid");
 
         _itemIds.increment();
+        _tradeId.increment();
+
         uint256 itemId = _itemIds.current();
+        uint256 tradeId = _tradeId.current();
 
         idToMarketItem[itemId] = MarketItem(
             itemId,
@@ -111,6 +141,14 @@ contract NFTMarketplace is ReentrancyGuard, Ownable {
             payable(address(0)),
             price,
             Status.Available
+        );
+
+        tradeIdtoTrade[tradeId] = Trade(
+            tradeId,
+            Tradetype.Listing,
+            itemId,
+            msg.sender,
+            block.number
         );
 
         IERC721(nftContract).transferFrom(msg.sender, address(this), tokenId);
@@ -133,6 +171,11 @@ contract NFTMarketplace is ReentrancyGuard, Ownable {
             "You don't own this token"
         );
 
+        _itemCanceled.increment();
+        _tradeId.increment();
+
+        uint256 tradeId = _tradeId.current();
+
         IERC721(idToMarketItem[itemId].nftContract).transferFrom(
             address(this),
             msg.sender,
@@ -140,7 +183,14 @@ contract NFTMarketplace is ReentrancyGuard, Ownable {
         );
 
         idToMarketItem[itemId].status = Status.Canceled;
-        _itemCanceled.increment();
+
+        tradeIdtoTrade[tradeId] = Trade(
+            tradeId,
+            Tradetype.Cancel,
+            itemId,
+            msg.sender,
+            block.number
+        );
     }
 
     //Buy an item
@@ -157,15 +207,27 @@ contract NFTMarketplace is ReentrancyGuard, Ownable {
         payable(address(this)).transfer(msg.value);
         claimableEth[idToMarketItem[itemId].seller] += msg.value;
 
+        _itemsSold.increment();
+        _tradeId.increment();
+
+        uint256 tradeId = _tradeId.current();
+
         IERC721(idToMarketItem[itemId].nftContract).transferFrom(
             address(this),
             msg.sender,
             tokenId
         );
 
+        tradeIdtoTrade[tradeId] = Trade(
+            tradeId,
+            Tradetype.Buy,
+            itemId,
+            msg.sender,
+            block.number
+        );
+
         idToMarketItem[itemId].owner = payable(msg.sender);
         idToMarketItem[itemId].status = Status.Sold;
-        _itemsSold.increment();
     }
 
     //Bid an item
@@ -181,8 +243,10 @@ contract NFTMarketplace is ReentrancyGuard, Ownable {
         require(allowedAsset[assetType] == nftContract, "Asset not valid");
 
         _BidId.increment();
+        _tradeId.increment();
 
         uint256 BidId = _BidId.current();
+        uint256 tradeId = _tradeId.current();
 
         bidIdtoBid[BidId] = Bid(
             BidId,
@@ -193,6 +257,14 @@ contract NFTMarketplace is ReentrancyGuard, Ownable {
             expirationBlock,
             payable(msg.sender),
             Status.Available
+        );
+
+        tradeIdtoTrade[tradeId] = Trade(
+            tradeId,
+            Tradetype.Bid,
+            BidId,
+            msg.sender,
+            block.number
         );
 
         emit MarketBid(
@@ -222,10 +294,22 @@ contract NFTMarketplace is ReentrancyGuard, Ownable {
             "Expired bid"
         );
 
+        _tradeId.increment();
+
+        uint256 tradeId = _tradeId.current();
+
         IERC721(bidIdtoBid[BidId].nftContract).transferFrom(
             msg.sender,
             bidIdtoBid[BidId].bider,
             bidIdtoBid[BidId].tokenId
+        );
+
+        tradeIdtoTrade[tradeId] = Trade(
+            tradeId,
+            Tradetype.Accept,
+            BidId,
+            msg.sender,
+            block.number
         );
 
         claimableEth[msg.sender] += bidIdtoBid[BidId].price;
@@ -237,6 +321,18 @@ contract NFTMarketplace is ReentrancyGuard, Ownable {
         require(msg.sender == bidIdtoBid[BidId].bider, "Not your bid");
         require(bidIdtoBid[BidId].status == Status.Available, "Expired bid");
 
+        _tradeId.increment();
+
+        uint256 tradeId = _tradeId.current();
+
+        tradeIdtoTrade[tradeId] = Trade(
+            tradeId,
+            Tradetype.Cancel,
+            BidId,
+            msg.sender,
+            block.number
+        );
+
         claimableEth[msg.sender] += bidIdtoBid[BidId].price;
         bidIdtoBid[BidId].status = Status.Canceled;
     }
@@ -244,7 +340,48 @@ contract NFTMarketplace is ReentrancyGuard, Ownable {
     //Claim user's eth
     function claim() public payable nonReentrant {
         payable(msg.sender).transfer(claimableEth[msg.sender]);
+
+        _tradeId.increment();
+        _claimId.increment();
+
+        uint256 tradeId = _tradeId.current();
+        uint256 claimId = _claimId.current();
+
+        claimIdtoClaim[claimId] = Claim(
+            claimId,
+            claimableEth[msg.sender],
+            msg.sender
+        );
+
+        tradeIdtoTrade[tradeId] = Trade(
+            tradeId,
+            Tradetype.Claim,
+            claimId,
+            msg.sender,
+            block.number
+        );
+
         claimableEth[msg.sender] = 0;
+    }
+
+    function tradeHistory(address user) public view returns(Trade[] memory) {
+        uint256 tradeId = _tradeId.current();
+        uint256 tradeNum = 0;
+
+        for (uint256 i = 0; i <= tradeId; i++) {
+            if (tradeIdtoTrade[tradeId].from == user) {
+                tradeNum++;
+            }
+        }
+
+        Trade[] memory trades = new Trade[] (tradeNum);
+        for (uint256 i = 0; i <= tradeId; i++) {
+            if (tradeIdtoTrade[tradeId].from == user) {
+                trades[i] = tradeIdtoTrade[tradeId];
+            }
+        }
+
+        return trades;
     }
 
     //Returns all unsold items
