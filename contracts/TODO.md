@@ -1,6 +1,5 @@
 # To Do
 
-- Keep track of bids accepts/cancels
 - Bids events (if the frontend needs it)
 - Tests
 - Add pagination to fetchMarketItems
@@ -17,4 +16,5 @@
 - Claim eth
 - Mapping of the allowed nft contract addresses managed by owner
 - List of unsold item and user item (might remove those if the frontend already does it)
-- Add openzeppelin Access Control
+- Add openzeppelin Ownable
+- Keep track of bids accepts/cancels

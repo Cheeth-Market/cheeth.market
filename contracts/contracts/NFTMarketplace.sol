@@ -5,7 +5,7 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/ownership/Ownable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
  Forked from https://gist.github.com/dabit3/52e818faa83449bb5303cb868aee78f5
@@ -23,6 +23,13 @@ contract NFTMarketplace is ReentrancyGuard, Ownable {
     Counters.Counter private _itemCanceled;
     Counters.Counter private _BidId;
 
+    enum Status {
+        Available,
+        Sold,
+        Canceled,
+        Accepted
+    }
+
     struct Bid {
         uint256 BidId;
         string assetType;
@@ -31,7 +38,7 @@ contract NFTMarketplace is ReentrancyGuard, Ownable {
         uint256 price;
         uint256 expirationBlock;
         address payable bider;
-        bool available;
+        Status status;
     }
 
     struct MarketItem {
@@ -42,18 +49,18 @@ contract NFTMarketplace is ReentrancyGuard, Ownable {
         address payable seller;
         address payable owner;
         uint256 price;
-        bool available;
+        Status status;
     }
 
     mapping(uint256 => MarketItem) private idToMarketItem;
     mapping(uint256 => Bid) private bidIdtoBid;
     mapping(string => address) private allowedAsset;
-    mapping(address => uint256) public claimableEth;
+    mapping(address => uint256) private claimableEth;
 
     event MarketBid(
         address indexed nftContract,
         uint256 indexed tokenId,
-        uint256 BidId,
+        uint256 indexed BidId,
         string assetType,
         uint256 price,
         address bider,
@@ -88,7 +95,7 @@ contract NFTMarketplace is ReentrancyGuard, Ownable {
         uint256 tokenId,
         uint256 price,
         string memory assetType
-    ) public payable nonReentrant {
+    ) public nonReentrant {
         require(price > 0, "Price must be at least 1 wei");
         require(allowedAsset[assetType] == nftContract, "Asset not valid");
 
@@ -103,7 +110,7 @@ contract NFTMarketplace is ReentrancyGuard, Ownable {
             payable(msg.sender),
             payable(address(0)),
             price,
-            true
+            Status.Available
         );
 
         IERC721(nftContract).transferFrom(msg.sender, address(this), tokenId);
@@ -120,7 +127,7 @@ contract NFTMarketplace is ReentrancyGuard, Ownable {
     }
 
     //Cancel a listing
-    function cancelMarketItem(uint256 itemId) public payable nonReentrant {
+    function cancelMarketItem(uint256 itemId) public nonReentrant {
         require(
             idToMarketItem[itemId].seller == msg.sender,
             "You don't own this token"
@@ -132,7 +139,7 @@ contract NFTMarketplace is ReentrancyGuard, Ownable {
             idToMarketItem[itemId].tokenId
         );
 
-        idToMarketItem[itemId].available = false;
+        idToMarketItem[itemId].status = Status.Canceled;
         _itemCanceled.increment();
     }
 
@@ -145,6 +152,7 @@ contract NFTMarketplace is ReentrancyGuard, Ownable {
             msg.value == price,
             "Please submit the asking price in order to complete the purchase"
         );
+        require(idToMarketItem[itemId].status == Status.Available, "Asset not available");
 
         payable(address(this)).transfer(msg.value);
         claimableEth[idToMarketItem[itemId].seller] += msg.value;
@@ -156,7 +164,7 @@ contract NFTMarketplace is ReentrancyGuard, Ownable {
         );
 
         idToMarketItem[itemId].owner = payable(msg.sender);
-        idToMarketItem[itemId].available = false;
+        idToMarketItem[itemId].status = Status.Sold;
         _itemsSold.increment();
     }
 
@@ -167,12 +175,15 @@ contract NFTMarketplace is ReentrancyGuard, Ownable {
         string memory assetType,
         uint256 price,
         uint256 expirationBlock,
-        address payable bider,
-        bool available
+        address payable bider
     ) public payable nonReentrant {
         require(price == msg.value, "Not enaugh funds");
         require(allowedAsset[assetType] == nftContract, "Asset not valid");
+
+        _BidId.increment();
+
         uint256 BidId = _BidId.current();
+
         bidIdtoBid[BidId] = Bid(
             BidId,
             assetType,
@@ -181,7 +192,7 @@ contract NFTMarketplace is ReentrancyGuard, Ownable {
             price,
             expirationBlock,
             payable(msg.sender),
-            true
+            Status.Available
         );
 
         emit MarketBid(
@@ -193,12 +204,10 @@ contract NFTMarketplace is ReentrancyGuard, Ownable {
             bider,
             expirationBlock
         );
-
-        _BidId.increment();
     }
 
     // Accept bid
-    function acceptBid(uint256 BidId) public payable nonReentrant {
+    function acceptBid(uint256 BidId) public nonReentrant {
         NFT nft = NFT(bidIdtoBid[BidId].nftContract);
         require(
             msg.sender ==
@@ -207,7 +216,7 @@ contract NFTMarketplace is ReentrancyGuard, Ownable {
                 ),
             "You don't own this token"
         );
-        require(bidIdtoBid[BidId].available == true, "Expired bid");
+        require(bidIdtoBid[BidId].status == Status.Available, "Bid not available");
         require(
             block.number < bidIdtoBid[BidId].expirationBlock,
             "Expired bid"
@@ -220,16 +229,16 @@ contract NFTMarketplace is ReentrancyGuard, Ownable {
         );
 
         claimableEth[msg.sender] += bidIdtoBid[BidId].price;
-        bidIdtoBid[BidId].available = false;
+        bidIdtoBid[BidId].status = Status.Accepted;
     }
 
     //Cancel bid
     function cancelBid(uint256 BidId) public nonReentrant {
         require(msg.sender == bidIdtoBid[BidId].bider, "Not your bid");
-        require(bidIdtoBid[BidId].available == true, "Expired bid");
+        require(bidIdtoBid[BidId].status == Status.Available, "Expired bid");
 
         claimableEth[msg.sender] += bidIdtoBid[BidId].price;
-        bidIdtoBid[BidId].available = false;
+        bidIdtoBid[BidId].status = Status.Canceled;
     }
 
     //Claim user's eth
@@ -248,7 +257,7 @@ contract NFTMarketplace is ReentrancyGuard, Ownable {
 
         MarketItem[] memory items = new MarketItem[](unsoldItemCount);
         for (uint256 i = 0; i < itemCount; i++) {
-            if (idToMarketItem[i + 1].available == true) {
+            if (idToMarketItem[i + 1].status == Status.Available) {
                 uint256 currentId = i + 1;
                 MarketItem storage currentItem = idToMarketItem[currentId];
                 items[currentIndex] = currentItem;
