@@ -48,7 +48,7 @@ contract NFTMarketplace is ReentrancyGuard, Ownable {
         uint256 tokenId;
         uint256 price;
         uint256 expirationBlock;
-        address payable bider;
+        address payable bidder;
         Status status;
     }
 
@@ -90,7 +90,7 @@ contract NFTMarketplace is ReentrancyGuard, Ownable {
         uint256 indexed BidId,
         string assetType,
         uint256 price,
-        address bider,
+        address bidder,
         uint256 expirationBlock
     );
 
@@ -237,7 +237,7 @@ contract NFTMarketplace is ReentrancyGuard, Ownable {
         string memory assetType,
         uint256 price,
         uint256 expirationBlock,
-        address payable bider
+        address payable bidder
     ) public payable nonReentrant {
         require(price == msg.value, "Not enaugh funds");
         require(allowedAsset[assetType] == nftContract, "Asset not valid");
@@ -273,7 +273,7 @@ contract NFTMarketplace is ReentrancyGuard, Ownable {
             BidId,
             assetType,
             price,
-            bider,
+            bidder,
             expirationBlock
         );
     }
@@ -300,7 +300,7 @@ contract NFTMarketplace is ReentrancyGuard, Ownable {
 
         IERC721(bidIdtoBid[BidId].nftContract).transferFrom(
             msg.sender,
-            bidIdtoBid[BidId].bider,
+            bidIdtoBid[BidId].bidder,
             bidIdtoBid[BidId].tokenId
         );
 
@@ -318,7 +318,7 @@ contract NFTMarketplace is ReentrancyGuard, Ownable {
 
     //Cancel bid
     function cancelBid(uint256 BidId) public nonReentrant {
-        require(msg.sender == bidIdtoBid[BidId].bider, "Not your bid");
+        require(msg.sender == bidIdtoBid[BidId].bidder, "Not your bid");
         require(bidIdtoBid[BidId].status == Status.Available, "Expired bid");
 
         _tradeId.increment();
