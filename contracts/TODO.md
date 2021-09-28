@@ -1,6 +1,5 @@
 # To Do
 
-- Tests
 - Add pagination to fetchMarketItems
 
 # Existing features
@@ -19,3 +18,4 @@
 - Keeping track of claims
 - Bids events (if the frontend needs it)
 - Trade history
+- Tests

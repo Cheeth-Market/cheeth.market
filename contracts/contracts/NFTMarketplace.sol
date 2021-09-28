@@ -104,6 +104,9 @@ contract NFTMarketplace is ReentrancyGuard, Ownable {
         uint256 price
     );
 
+    fallback() external payable {
+    }
+
     function pushAsset(string memory assetType, address nftContract) public onlyOwner{
         allowedAsset[assetType] = nftContract;
     }
@@ -236,8 +239,7 @@ contract NFTMarketplace is ReentrancyGuard, Ownable {
         uint256 tokenId,
         string memory assetType,
         uint256 price,
-        uint256 expirationBlock,
-        address payable bidder
+        uint256 expirationBlock
     ) public payable nonReentrant {
         require(price == msg.value, "Not enaugh funds");
         require(allowedAsset[assetType] == nftContract, "Asset not valid");
@@ -273,7 +275,7 @@ contract NFTMarketplace is ReentrancyGuard, Ownable {
             BidId,
             assetType,
             price,
-            bidder,
+            msg.sender,
             expirationBlock
         );
     }
