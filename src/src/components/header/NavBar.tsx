@@ -2,7 +2,7 @@ import React, { FC } from 'react';
 import { Button, Dropdown, PageHeader } from 'antd';
 import { Menu} from 'antd';
 import { EllipsisOutlined } from '@ant-design/icons';
-
+import WalletButton from "./WalletButton";
 
 
 const DropdownMenu = () => (
@@ -51,9 +51,7 @@ function NavBar() {
         subTitle="Marketplace"
         extra={[
           <Button key="2">List your Mice</Button>,
-          <Button key="1" type="primary">
-            Connect
-          </Button>,
+          <WalletButton />,
            <DropdownMenu key="more" />,
         ]}
       >
