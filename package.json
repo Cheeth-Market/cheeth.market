@@ -1,5 +1,5 @@
 {
-    "name": "anonymice-marketplace",
+    "name": "anonymarket",
     "scripts": {
         "test": "cd contracts && npx hardhat test",
         "compile": "cd contracts && npx hardhat compile",
