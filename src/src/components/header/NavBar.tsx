@@ -1,63 +1,64 @@
-import React, { FC } from 'react';
-import { Button, Dropdown, PageHeader } from 'antd';
-import { Menu} from 'antd';
-import { EllipsisOutlined } from '@ant-design/icons';
+import React from "react";
+import { Button, Dropdown, PageHeader } from "antd";
+import { Menu } from "antd";
+import { EllipsisOutlined } from "@ant-design/icons";
 import WalletButton from "./WalletButton";
 
 
+
+
 const DropdownMenu = () => (
-    <Dropdown key="more" overlay={menu}>
-      <Button
+  <Dropdown key="more" overlay={menu}>
+    <Button
+      style={{
+        border: "none",
+        padding: 0,
+      }}
+    >
+      <EllipsisOutlined
         style={{
-          border: 'none',
-          padding: 0,
+          fontSize: 20,
+          verticalAlign: "top",
         }}
+      />
+    </Button>
+  </Dropdown>
+);
+
+const menu = (
+  <Menu>
+    <Menu.Item key="official">
+      <a
+        target="_blank"
+        rel="noopener noreferrer"
+        href="https://etherscan.io/address/0xbad6186e92002e312078b5a1dafd5ddf63d3f731#code"
       >
-        <EllipsisOutlined
-          style={{
-            fontSize: 20,
-            verticalAlign: 'top',
-          }}
-        />
-      </Button>
-    </Dropdown>
-  );
-  
-  const menu = (
-    <Menu>
-      <Menu.Item>
-        <a target="_blank" rel="noopener noreferrer" href="">
-          Official Site
-        </a>
-      </Menu.Item>
-      <Menu.Item>
-        <a target="_blank" rel="noopener noreferrer" href="">
-          Stake
-        </a>
-      </Menu.Item>
-      <Menu.Item>
-        <a target="_blank" rel="noopener noreferrer" href="">
-          ???
-        </a>
-      </Menu.Item>
-    </Menu>
-  );
+        Official Site
+      </a>
+    </Menu.Item>
+    <Menu.Item key="staking">
+      <a
+        target="_blank"
+        rel="noopener noreferrer"
+        href="https://anonymicestaker.0xinuarashi.dev/"
+      >
+        Stake
+      </a>
+    </Menu.Item>
+  </Menu>
+);
 
 function NavBar() {
-    return(
-        <PageHeader
-        ghost={false}
-        title="Anonymice"
-        subTitle="Marketplace"
-        extra={[
-          <Button key="2">List your Mice</Button>,
-          <WalletButton />,
-           <DropdownMenu key="more" />,
-        ]}
-      >
-      </PageHeader>
-    );
+  return (
+    <PageHeader
+      ghost={false}
+      title="Anonymarket"
+      subTitle=""
+      extra={[
+      <WalletButton key="wallet" />, 
+      <DropdownMenu key="more" />]}
+    ></PageHeader>
+  );
 }
-  
-export default NavBar;
 
+export default NavBar;

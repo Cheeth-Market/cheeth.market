@@ -1,7 +1,4 @@
-import React, { FC } from 'react';
-import { Button, Col, Dropdown, PageHeader, Row } from 'antd';
-import { Menu} from 'antd';
-import { EllipsisOutlined } from '@ant-design/icons';
+import { Col, Row } from 'antd';
 import Title from 'antd/lib/typography/Title';
 import DummyGrid from './DummyGrid';
 

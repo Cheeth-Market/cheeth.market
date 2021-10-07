@@ -1,5 +1,15 @@
 @import '~antd/dist/antd.css';
 
+
+@font-face {
+  font-family: 'PixelFont';
+  src: url('./assets/fonts/pixelfont.ttf')  format('truetype')
+}
+
+body {
+  font-family: 'PixelFont', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif
+}
+
 .site-layout-content {
   min-height: 280px;
   padding: 24px;

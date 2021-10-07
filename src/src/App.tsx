@@ -1,17 +1,15 @@
 import React, { FC } from 'react';
-import { Button, Col, Divider, Dropdown, PageHeader, Row, Space } from 'antd';
+import { Col, Row } from 'antd';
 import './App.css';
-import { Layout, Menu, Breadcrumb, Typography, Image} from 'antd';
+import { Layout } from 'antd';
 import NavBar from './components/header/NavBar'
 import ContentHeader from './components/header/ContentHeader'
-import LargestSalesWrapper from './components/sales/SalesWrapper'
-import ForSaleWrapper from './components/sales/ForSaleWrapper'
-import Stats from './components/stats/Stats'
-const { Title } = Typography;
-const { Header, Content, Footer } = Layout;
+import { Symfoni } from './hardhat/SymfoniContext';
+const { Content, Footer } = Layout;
 
 const App: FC = () => (
   <div className="App">
+    <Symfoni autoInit={false} showLoading={false} >
       <Layout className="layout">
       <NavBar/>
         <Content style={{ padding: '0 50px', background:'#fff' }}>
@@ -20,13 +18,14 @@ const App: FC = () => (
               <Col span={2}></Col>
               <Col span={20}>
                 <ContentHeader/>
-                <LargestSalesWrapper/>
-                <ForSaleWrapper/>
-                <Stats/>
-                <Image
+                
+                
+
+                <img alt="why"
                   style={{ marginTop: '100px'}}
                   src={`${process.env.PUBLIC_URL}/img/whymice.png`}
                 />
+                
               </Col>
               <Col span={2}></Col>
             </Row>
@@ -34,7 +33,7 @@ const App: FC = () => (
         </Content>
         <Footer style={{ textAlign: 'center' }}>We Like The Mice.</Footer>
       </Layout>
-    
+    </Symfoni>
   </div>
 );
 

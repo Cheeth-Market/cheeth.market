@@ -1,14 +1,10 @@
-import React, { FC } from 'react';
-import { Button, Col, Dropdown, PageHeader, Row, Image } from 'antd';
-import { Menu} from 'antd';
-import { EllipsisOutlined } from '@ant-design/icons';
+import { Col, Row, Image } from 'antd';
 import Title from 'antd/lib/typography/Title';
 
-
-var mouseData = ['Jake', 'Jon', 'Thruster'];
-var mouseList = mouseData.map(function(name){
-  return <li>{name}</li>;
-})
+// var mouseData = ['Jake', 'Jon', 'Thruster'];
+// var mouseList = mouseData.map(function(name){
+//   return <li>{name}</li>;
+// })
 function DummyGrid() {
 
   const mouseData = [
