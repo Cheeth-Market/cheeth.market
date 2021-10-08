@@ -5,6 +5,6 @@
         "compile": "cd contracts && npx hardhat compile",
         "node": "cd contracts && npx hardhat node --watch",
         "frontend": "cd src && npm run start",
-        "install": "cd contracts && npm install && cd .. && cd src && npm install && cd .."
+        "install": "cd contracts && yarn install && cd .. && cd src && yarn install && cd .."
     }
 }
