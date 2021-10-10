@@ -4,6 +4,7 @@
         "test": "cd contracts && npx hardhat test",
         "compile": "cd contracts && npx hardhat compile",
         "node": "cd contracts && npx hardhat node --watch",
+        "deploy": "cd contracts && npx hardhat --nework localhost run scripts/sample-script.js",
         "frontend": "cd src && npm run start",
         "install": "cd contracts && yarn install && cd .. && cd src && yarn install && cd .."
     }

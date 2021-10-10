@@ -1,21 +1,48 @@
-import React from 'react';
-import { Col, Row } from 'antd';
-import Title from 'antd/lib/typography/Title';
-import DummyGrid from './DummyGrid';
+import React, { useCallback, useContext, useEffect, useState } from "react";
+import { Button, Col, Row } from "antd";
+import Title from "antd/lib/typography/Title";
+import DummyGrid from "./DummyGrid";
+import useTestNFT from "../../hooks/useTestNFT";
+import { CurrentAddressContext } from "../../hardhat/SymfoniContext";
+import { BigNumber } from "@ethersproject/bignumber";
 
 function ForSaleWrapper() {
-    return(
+  const [currentAddress] = useContext(CurrentAddressContext);
+  const { mint, fetch, getBalance } = useTestNFT();
+  const [usersTestNfts, setUsersTestNfts] = useState<BigNumber[]>();
+
+  // useEffect(() => {
+  //   fetchNfts();
+  // }, [fetchNfts]);
+
+  const fetchTestNftsTokensOwnedByUser = async () => {
+    const nfts = await fetch();
+    if (!nfts) {
+      console.log("User doesn't have any TestNFTs");
+      return;
+    }
+    console.log(`User has ${nfts.length} TestNFTs`);
+    setUsersTestNfts(nfts);
+  };
+
+  return (
+    <>
+      <Button onClick={mint}>{currentAddress === "" ? "" : "MINT"}</Button>
+      <Button onClick={fetchTestNftsTokensOwnedByUser}>
+        {currentAddress === "" ? "" : "FETCH"}
+      </Button>
+      
+      {usersTestNfts ? usersTestNfts.length.toString() : ""}
+      {usersTestNfts?.map((nftTokenId) => (
         <>
-            <Row  style={{ marginTop: '100px'}}>
-            <Col span={24} style={{ }}>
-            <Title level={2}>Mices for sale</Title>
-                <Title level={4} style={{ marginTop: '0px'}} type="secondary">The lowest price Mice currently for sale is 10 E</Title>
-                <Title level={4} style={{ marginTop: '-10px'}} type="secondary">Showing most recent offers, <a href="">click here to see all 221</a>.</Title>
-                </Col>
-            </Row>
-            <DummyGrid/>
+          <div key={nftTokenId.toString()}>{nftTokenId.toString()}</div>
+          
         </>
-    );
+      ))}
+
+      {/* <DummyGrid /> */}
+    </>
+  );
 }
-  
+
 export default ForSaleWrapper;

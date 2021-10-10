@@ -19,7 +19,7 @@ describe('NFTMarketplace', function() {
     const NFTMarketplace = await ethers.getContractFactory('NFTMarketplace');
     const nftMarketplace = await NFTMarketplace.deploy();
 
-    const testNFT = await ethers.getContractFactory('testNFT');
+    const testNFT = await ethers.getContractFactory('TestNFT');
     const testnft = await testNFT.deploy();
 
     const [owner, seller, buyer] = await ethers.getSigners();
@@ -47,7 +47,7 @@ describe('NFTMarketplace', function() {
     const NFTMarketplace = await ethers.getContractFactory('NFTMarketplace');
     const nftMarketplace = await NFTMarketplace.deploy();
 
-    const testNFT = await ethers.getContractFactory('testNFT');
+    const testNFT = await ethers.getContractFactory('TestNFT');
     const testnft = await testNFT.deploy();
 
     const [owner, seller, buyer] = await ethers.getSigners();
@@ -73,7 +73,7 @@ describe('NFTMarketplace', function() {
     const NFTMarketplace = await ethers.getContractFactory('NFTMarketplace');
     const nftMarketplace = await NFTMarketplace.deploy();
 
-    const testNFT = await ethers.getContractFactory('testNFT');
+    const testNFT = await ethers.getContractFactory('TestNFT');
     const testnft = await testNFT.deploy();
 
     const [owner, bidder, seller] = await ethers.getSigners();
@@ -101,7 +101,7 @@ describe('NFTMarketplace', function() {
     const NFTMarketplace = await ethers.getContractFactory('NFTMarketplace');
     const nftMarketplace = await NFTMarketplace.deploy();
 
-    const testNFT = await ethers.getContractFactory('testNFT');
+    const testNFT = await ethers.getContractFactory('TestNFT');
     const testnft = await testNFT.deploy();
 
     const [owner, bidder, seller] = await ethers.getSigners();

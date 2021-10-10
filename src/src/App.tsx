@@ -5,6 +5,7 @@ import { Layout } from 'antd';
 import NavBar from './components/header/NavBar'
 import ContentHeader from './components/header/ContentHeader'
 import { Symfoni } from './hardhat/SymfoniContext';
+import ForSaleWrapper from './components/sales/ForSaleWrapper';
 const { Content, Footer } = Layout;
 
 const App: FC = () => (
@@ -17,9 +18,8 @@ const App: FC = () => (
             <Row>
               <Col span={2}></Col>
               <Col span={20}>
-                <ContentHeader/>
                 
-                
+                <ForSaleWrapper />                
 
                 <img alt="why"
                   style={{ marginTop: '100px'}}
